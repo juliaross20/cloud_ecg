@@ -1,0 +1,12 @@
+name: cloudECG
+dependencies:
+        - python = 3.6
+        - numpy
+        - scipy
+        - pandas
+        - pytest
+        - pytest-pep8
+        - pytest-cov
+        - sphinx
+        - ipython
+        - flask
