@@ -1,11 +1,11 @@
-import ECG_Class
+import bme590_assignment02.ECG_Class
 from flask import Flask, jsonify, request
 import numpy as np
 
 app = Flask(__name__)
 
 
-@app.route("heart_rate/summary", method='POST')
+@app.route("/heart_rate/summary", methods = ['POST'])
 def give_summary():
     dictionary = request.json
     if 'time' in dictionary.keys():
@@ -37,7 +37,7 @@ def give_summary():
                     print("Dictionary does not contain valid voltage")
                     # Here, assign dummy value to d2 to get rid of pep8 error
     dat = [d1, d2]  # Pep8: local variables referenced before assignment
-    ecg_object = ECG_Class('api', dat)
+    ecg_object = ECG_Class(dat)
     hr = ecg_object.instHR
     ta = ecg_object.tachyT
     ba = ecg_object.bradyT
