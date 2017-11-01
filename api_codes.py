@@ -4,9 +4,13 @@ from flask import Flask, jsonify, request
 import numpy as np
 
 app = Flask(__name__)
+count_requests = 0  # Global variable 
 
-@app.route("/heart_rate/summary", methods = ['POST'])
+
+@app.route("/heart_rate/summary", methods=['POST'])
 def give_summary():
+    global count_requests
+    count_requests += 1
     dictionary = request.json
     if 'time' in dictionary.keys():
         d1 = dictionary['time']
@@ -53,23 +57,25 @@ def give_summary():
 
 @app.route('/heart_rate/average')
 def give_avg_summary():
-    dict = request.json
-    if 'time' in dict.keys():
-        d1 = dict['time']
+    global count_requests
+    count_requests += 1
+    dictionary = request.json
+    if 'time' in dictionary.keys():
+        d1 = dictionary['time']
     else:
         try:
-            d1 = dict['t']
+            d1 = dictionary['t']
         except ValueError:
             print("Dictionary does not contain valid time")
-    if 'voltage' in dict.keys():
-        d2 = dict['voltage']
+    if 'voltage' in dictionary.keys():
+        d2 = dictionary['voltage']
     else:
         try:
-            d2 = dict['v']
+            d2 = dictionary['v']
         except ValueError:
             print("Dictionary does not contain valid voltage")
     if 'averaging_period' in dict.keys():
-        ap = dict['averaging_period']
+        ap = dictionary['averaging_period']
     else:
         raise ValueError("Dictionary does not contain valid period")
     dat = [d1, d2]
@@ -84,5 +90,12 @@ def give_avg_summary():
               'bradycardia_annotations': ba
               }
     ret = jsonify(output)
-
     return ret
+
+
+@app.route("/heart_rate/num_requests", methods=['GET'])
+def num_requests():
+    global count_requests
+    count_requests += 1
+    return count_requests
+
