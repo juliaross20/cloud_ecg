@@ -72,7 +72,7 @@ def give_avg_summary():
             d2 = dictionary['v']
         except ValueError:
             print('Dictionary does not contain valid voltage')
-    if 'averaging_period' in dict.keys():
+    if 'averaging_period' in dictionary.keys():
         ap = dictionary['averaging_period']
     else:
         raise ValueError('Dictionary does not contain valid period')
