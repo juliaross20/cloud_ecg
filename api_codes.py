@@ -100,3 +100,10 @@ def requests():
     ret = jsonify(count_requests)
     return ret
 
+
+def send_error(message, code):  # Suyash error function
+    err = {
+        "error": message,
+    }
+    return jsonify(err), code
+
