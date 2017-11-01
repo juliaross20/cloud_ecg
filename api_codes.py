@@ -25,7 +25,6 @@ def give_summary():
                     d1 = dictionary['Time']
                 except ValueError:
                     print('Dictionary does not contain valid time')
-                    # Here, assign dummy value to d1 to get rid of pep8 error
     if 'voltage' in dictionary.keys():
         d2 = dictionary['voltage']
     else:
@@ -39,13 +38,12 @@ def give_summary():
                     d2 = dictionary['Voltage']
                 except ValueError:
                     print('Dictionary does not contain valid voltage')
-                    # Here, assign dummy value to d2 to get rid of pep8 error
-    dat = [d1, d2]  # Pep8: local variables referenced before assignment
+    dat = [d1, d2]
     ecg_object = ECG_Class(dat)
     
-    hr = ecg_object.instHR
-    ta = ecg_object.tachyT
-    ba = ecg_object.bradyT
+    hr = ecg_object.HRinst(ecg_object.data)  # I think this is right?
+    ta = ecg_object.tachy('inst')
+    ba = ecg_object.brady('inst')
     output = {'time': d1,
               'instantaneous_heart_rate': hr,
               'tachycardia_annotations': ta,
@@ -81,8 +79,8 @@ def give_avg_summary():
     dat = [d1, d2]
     ecg_object = ECG_Class.ECG_Class('api', dat=dat, avemins=ap)
     ahr = ecg_object.avg()
-    ta = ecg_object.tachyT
-    ba = ecg_object.bradyT
+    ta = ecg_object.tachy('avg')
+    ba = ecg_object.brady('avg')
     output = {'time_interval': d1,
               'averaging_period': ap,
               'average_heart_rate': ahr,
