@@ -24,7 +24,7 @@ def give_summary():
                 try:
                     d1 = dictionary['Time']
                 except ValueError:
-                    print('Dictionary does not contain valid time')
+                    return send_error('Dictionary does not contain valid ''time'' data', 400)
     if 'voltage' in dictionary.keys():
         d2 = dictionary['voltage']
     else:
@@ -37,10 +37,13 @@ def give_summary():
                 try:
                     d2 = dictionary['Voltage']
                 except ValueError:
-                    print('Dictionary does not contain valid voltage')
+                    return send_error('Dictionary does not contain valid ''voltage'' data', 400)
     dat = [d1, d2]
-    ecg_object = ECG_Class(dat)
-    
+    try:
+        ecg_object = ECG_Class(dat)
+    except: # this should be made much more specific
+        return send_error('stop giving me bad data dummy', 400)
+
     hr = ecg_object.HRinst(ecg_object.data)  # I think this is right?
     ta = ecg_object.tachy('inst')
     ba = ecg_object.brady('inst')
@@ -64,18 +67,30 @@ def give_avg_summary():
         try:
             d1 = dictionary['t']
         except ValueError:
-            print('Dictionary does not contain valid time')
+            try:
+                d1 = dictionary['T']
+            except ValueError:
+                try:
+                    d1 = dictionary['Time']
+                except ValueError:
+                    return send_error('Dictionary does not contain valid ''time'' data', 400)
     if 'voltage' in dictionary.keys():
         d2 = dictionary['voltage']
     else:
         try:
             d2 = dictionary['v']
         except ValueError:
-            print('Dictionary does not contain valid voltage')
+            try:
+                d2 = dictionary['V']
+            except ValueError:
+                try:
+                    d2 = dictionary['Voltage']
+                except ValueError:
+                    return send_error('Dictionary does not contain valid ''voltage'' data', 400)
     if 'averaging_period' in dictionary.keys():
         ap = dictionary['averaging_period']
     else:
-        raise ValueError('Dictionary does not contain valid period')
+        return send_error('Dictionary does not contain valid ''averaging_period'' data', 400)
     dat = [d1, d2]
     ecg_object = ECG_Class.ECG_Class('api', dat=dat, avemins=ap)
     ahr = ecg_object.avg()
