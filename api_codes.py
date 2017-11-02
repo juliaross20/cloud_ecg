@@ -38,17 +38,17 @@ def give_summary():
                     d2 = dictionary['Voltage']
                 except ValueError:
                     return send_error('Dictionary does not contain valid ''voltage'' data', 400)
-    dat = [d1, d2]
+    dat = (np.array(d1),np.array(d2))
  #   try:
     ecg_object = ECG_Class(dat)
  #   except: # this should be made much more specific
  #       return send_error('stop giving me bad data dummy', 400)
 
-    hr = ecg_object.HRinst(ecg_object.data)  # I think this is right?
+    hr = ecg_object.instHR
     ta = ecg_object.tachy('inst')
     ba = ecg_object.brady('inst')
     output = {'time': d1,
-              'instantaneous_heart_rate': hr,
+              'instantaneous_heart_rate': hr.tolist(),
               'tachycardia_annotations': ta,
               'bradycardia_annotations': ba
               }
@@ -91,8 +91,8 @@ def give_avg_summary():
         ap = dictionary['averaging_period']
     else:
         return send_error('Dictionary does not contain valid ''averaging_period'' data', 400)
-    dat = [d1, d2]
-    ecg_object = ECG_Class.ECG_Class('api', dat=dat, avemins=ap)
+    dat = (np.array(d1), np.array(d2))
+    ecg_object = ECG_Class(dat, avemins=ap)
     ahr = ecg_object.avg()
     ta = ecg_object.tachy('avg')
     ba = ecg_object.brady('avg')
