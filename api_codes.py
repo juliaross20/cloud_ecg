@@ -1,5 +1,5 @@
 
-import bme590_assignment02.ECG_Class
+from bme590_assignment02.ECG_Class import ECG_Class
 from flask import Flask, jsonify, request
 import numpy as np
 
@@ -39,10 +39,10 @@ def give_summary():
                 except ValueError:
                     return send_error('Dictionary does not contain valid ''voltage'' data', 400)
     dat = [d1, d2]
-    try:
-        ecg_object = ECG_Class(dat)
-    except: # this should be made much more specific
-        return send_error('stop giving me bad data dummy', 400)
+ #   try:
+    ecg_object = ECG_Class(dat)
+ #   except: # this should be made much more specific
+ #       return send_error('stop giving me bad data dummy', 400)
 
     hr = ecg_object.HRinst(ecg_object.data)  # I think this is right?
     ta = ecg_object.tachy('inst')
