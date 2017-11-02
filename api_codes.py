@@ -8,17 +8,26 @@ count_requests = 0  # Global variable
 
 
 @app.route('/heart_rate/summary', methods=['POST'])
-def give_summary():
-    '''
-    This is the endpoint for the data summary
+def get_data_for_summary():
+     '''
+    This loads in the data for the summary endpoint
     
-    :return: output: (json) A json containing time, instantaneous HR, and
-        brady and tachy cardia diagnoses
-    '''
+    :return: dictionary: (dict) a dictionary containing the data in the body
 
-    global count_requests
+    '''
+   global count_requests
     count_requests += 1
     dictionary = request.json
+    data = check_and_parse_summary(dictionary)
+    out = give_summary(data)
+    return out
+def check_and_parse_summary(dictionary):
+    '''
+    This validates the data and turn it into a tuple that
+
+    :return: dat: (tuple) a tuple of time and voltage data
+    '''
+
     if 'time' in dictionary.keys():
         d1 = dictionary['time']
     else:
@@ -46,6 +55,17 @@ def give_summary():
                 except ValueError:
                     return send_error('Dictionary does not contain valid ''voltage'' data', 400)
     dat = (np.array(d1),np.array(d2))
+    return dat
+def give_summary(dat):
+    '''
+    This is the endpoint for the data summary
+    
+    :param dat: (tuple) a tuple containing time and voltage data
+    
+    :return: output: (json) A json containing time, instantaneous HR, and
+        brady and tachy cardia diagnoses
+    '''
+    
  #   try:
     ecg_object = ECG_Class(dat)
  #   except: # this should be made much more specific
@@ -64,17 +84,20 @@ def give_summary():
 
 
 @app.route('/heart_rate/average', methods=['POST'])
-def give_avg_summary():
-    ''' 
-    This is the endpoint for the averaging commands
-    
-    :return: output: (json) A json containing the time interval, averaging period,
-    average heart rate, and brady and tachy diagnoses
-    '''
-
+def get_data_for_average():
     global count_requests
     count_requests += 1
     dictionary = request.json
+    dat,ap = check_and_parse_average(dictionary)
+    output = return_average_summary(dat,ap)
+    return output
+def chack_and_parse_average(dictionary):
+'''
+    This loads in the data for the average endpoint
+    
+    :return: dictionary: (dict) a dictionary containing the data in the body
+
+    '''
     if 'time' in dictionary.keys():
         d1 = dictionary['time']
     else:
@@ -101,12 +124,24 @@ def give_avg_summary():
                     d2 = dictionary['Voltage']
                 except ValueError:
                     return send_error('Dictionary does not contain valid ''voltage'' data', 400)
-    if 'averaging_period' in dictionary.keys():[MaAD
+    if 'averaging_period' in dictionary.keys():
         ap = dictionary['averaging_period']
     else:
         return send_error('Dictionary does not contain valid ''averaging_period'' data', 400)
     dat = (np.array(d1), np.array(d2))
-    ecg_object = ECG_Class(dat, avemins=ap)
+    avep = ap
+    return dat,ap
+
+def give_avg_summary(dat,amins=ap):
+    ''' 
+    This is the endpoint for the averaging commands
+    
+    :params dat: a tuple containing time and voltage data
+    :return: output: (json) A json containing the time interval, averaging period,
+    average heart rate, and brady and tachy diagnoses
+    '''
+
+    ecg_object = ECG_Class(dat, amins)
     ahr = ecg_object.avg()
     ta = ecg_object.tachy('avg')
     ba = ecg_object.brady('avg')
