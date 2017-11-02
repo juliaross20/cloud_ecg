@@ -1,4 +1,3 @@
-
 from bme590_assignment02.ECG_Class import ECG_Class
 from flask import Flask, jsonify, request
 import numpy as np
@@ -9,24 +8,25 @@ count_requests = 0  # Global variable
 
 @app.route('/heart_rate/summary', methods=['POST'])
 def get_data_for_summary():
-     '''
-    This loads in the data for the summary endpoint
-    
-    :return: dictionary: (dict) a dictionary containing the data in the body
-
-    '''
-   global count_requests
+    """
+    Summary endpoint: Accepts user data and returns instantaneous heart rate and brady tachy annotations
+    :return: resp: (json) instantaneous heart rate and brady tachy annotations
+    """
+    global count_requests
     count_requests += 1
-    dictionary = request.json
-    data = check_and_parse_summary(dictionary)
-    out = give_summary(data)
-    return out
-def check_and_parse_summary(dictionary):
-    '''
-    This validates the data and turn it into a tuple that
+    req = request.json  # Retrieve external data
+    data = check_and_parse_summary(req)  # Validate the data and map to internal format
+    out = calc_summary(data)  # Process the data
+    resp = jsonify(out)  # Map internal data to external format
+    return resp  # Respond to client
 
-    :return: dat: (tuple) a tuple of time and voltage data
-    '''
+
+def check_and_parse_summary(dictionary):
+    """
+    This validates the user input data and turns it into a tuple (Map external-->internal)
+    :param: dictionary: (dict) User data (time and voltage)
+    :return: dat: (tuple) User data (time and voltage)
+    """
 
     if 'time' in dictionary.keys():
         d1 = dictionary['time']
@@ -54,50 +54,53 @@ def check_and_parse_summary(dictionary):
                     d2 = dictionary['Voltage']
                 except ValueError:
                     return send_error('Dictionary does not contain valid ''voltage'' data', 400)
-    dat = (np.array(d1),np.array(d2))
+    dat = (np.array(d1), np.array(d2))
     return dat
-def give_summary(dat):
-    '''
-    This is the endpoint for the data summary
-    
-    :param dat: (tuple) a tuple containing time and voltage data
-    
-    :return: output: (json) A json containing time, instantaneous HR, and
-        brady and tachy cardia diagnoses
-    '''
-    
- #   try:
+
+
+def calc_summary(dat):
+    """
+    This calculates the average heart rate and brady tachy annotations
+    :param: dat: (tuple) User data (time and voltage)
+    :return: output: (dict) Contains time, instantaneous HR, and brady tachy cardia annotations
+    """
+
+    #   try:
     ecg_object = ECG_Class(dat)
- #   except: # this should be made much more specific
- #       return send_error('stop giving me bad data dummy', 400)
+    #   except: # this should be made much more specific
+    #       return send_error('stop giving me bad data dummy', 400)
 
     hr = ecg_object.instHR
     ta = ecg_object.tachy('inst')
     ba = ecg_object.brady('inst')
-    output = {'time': d1,
+    output = {'time': dat[0],
               'instantaneous_heart_rate': hr.tolist(),
               'tachycardia_annotations': ta,
               'bradycardia_annotations': ba
               }
-    ret = jsonify(output)
-    return ret
+    return output
 
 
 @app.route('/heart_rate/average', methods=['POST'])
 def get_data_for_average():
+    """
+    Average endpoint: Accepts user data and returns average heart rate and brady tachy annotations
+    :return: resp: (json) average heart rate and brady tachy annotations
+    """
     global count_requests
     count_requests += 1
-    dictionary = request.json
-    dat,ap = check_and_parse_average(dictionary)
-    output = return_average_summary(dat,ap)
-    return output
-def chack_and_parse_average(dictionary):
-'''
-    This loads in the data for the average endpoint
-    
-    :return: dictionary: (dict) a dictionary containing the data in the body
+    req = request.json  # Retrieve external data
+    dat, ap = check_and_parse_average(req)  # Validate the data and map to internal format
+    out = give_average_summary(dat, ap)  # Process the data
+    resp = jsonify(out)  # Map internal data to external format
+    return resp  # Respond to client
 
-    '''
+
+def check_and_parse_average(dictionary):
+    """
+    This validates the user input data and turns it into a tuple (Map external-->internal)
+    :return: dictionary: (dict) User data (time and voltage)
+    """
     if 'time' in dictionary.keys():
         d1 = dictionary['time']
     else:
@@ -129,44 +132,39 @@ def chack_and_parse_average(dictionary):
     else:
         return send_error('Dictionary does not contain valid ''averaging_period'' data', 400)
     dat = (np.array(d1), np.array(d2))
-    avep = ap
-    return dat,ap
+    return dat, ap
 
-def give_avg_summary(dat,amins=ap):
-    ''' 
-    This is the endpoint for the averaging commands
-    
-    :params dat: a tuple containing time and voltage data
-    :return: output: (json) A json containing the time interval, averaging period,
+
+def give_average_summary(dat, avg_secs):
+    """
+    :param dat: (tuple) User data (time and voltage)
+    :param avg_secs: (int) Number of seconds to average over (bin size)
+    :return: output: (json) Contains the time interval, averaging period,
     average heart rate, and brady and tachy diagnoses
-    '''
-
-    ecg_object = ECG_Class(dat, amins)
+    """
+    ecg_object = ECG_Class(dat, avg_secs)
     ahr = ecg_object.avg()
     ta = ecg_object.tachy('avg')
     ba = ecg_object.brady('avg')
-    output = {'time_interval': d1,
-              'averaging_period': ap,
+    output = {'time_interval': dat[0],
+              'averaging_period': avg_secs,
               'average_heart_rate': ahr,
               'tachycardia_annotations': ta,
               'bradycardia_annotations': ba
               }
-    ret = jsonify(output)
-    return ret
+    return output
 
 
 @app.route('/heart_rate/requests', methods=['GET'])
 def requests():
-    '''
-    This is the request endpoint
-
-    :returns: ret: (int) the number of times a request has been made
-    '''
-    
+    """
+    Returns the number of requests made to the server since its last reboot
+    :return: resp: (int) The number of requests
+    """
     global count_requests
     count_requests += 1
-    ret = jsonify(count_requests)
-    return ret
+    resp = jsonify(count_requests)
+    return resp
 
 
 def send_error(message, code):  # Suyash error function
@@ -174,4 +172,3 @@ def send_error(message, code):  # Suyash error function
         "error": message,
     }
     return jsonify(err), code
-
