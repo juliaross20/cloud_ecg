@@ -9,6 +9,13 @@ count_requests = 0  # Global variable
 
 @app.route('/heart_rate/summary', methods=['POST'])
 def give_summary():
+    '''
+    This is the endpoint for the data summary
+    
+    :return: output: (json) A json containing time, instantaneous HR, and
+        brady and tachy cardia diagnoses
+    '''
+
     global count_requests
     count_requests += 1
     dictionary = request.json
@@ -58,6 +65,13 @@ def give_summary():
 
 @app.route('/heart_rate/average', methods=['POST'])
 def give_avg_summary():
+    ''' 
+    This is the endpoint for the averaging commands
+    
+    :return: output: (json) A json containing the time interval, averaging period,
+    average heart rate, and brady and tachy diagnoses
+    '''
+
     global count_requests
     count_requests += 1
     dictionary = request.json
@@ -87,7 +101,7 @@ def give_avg_summary():
                     d2 = dictionary['Voltage']
                 except ValueError:
                     return send_error('Dictionary does not contain valid ''voltage'' data', 400)
-    if 'averaging_period' in dictionary.keys():
+    if 'averaging_period' in dictionary.keys():[MaAD
         ap = dictionary['averaging_period']
     else:
         return send_error('Dictionary does not contain valid ''averaging_period'' data', 400)
@@ -108,6 +122,12 @@ def give_avg_summary():
 
 @app.route('/heart_rate/requests', methods=['GET'])
 def requests():
+    '''
+    This is the request endpoint
+
+    :returns: ret: (int) the number of times a request has been made
+    '''
+    
     global count_requests
     count_requests += 1
     ret = jsonify(count_requests)
