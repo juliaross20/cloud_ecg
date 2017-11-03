@@ -10,6 +10,7 @@ count_requests = 0  # Global variable
 def get_data_for_summary():
     """
     Summary endpoint: Accepts user data and returns instantaneous heart rate and brady tachy annotations
+
     :return: resp: (json) instantaneous heart rate and brady tachy annotations
     """
     global count_requests
@@ -24,6 +25,7 @@ def get_data_for_summary():
 def check_and_parse_summary(dictionary):
     """
     This validates the user input data and turns it into a tuple (Map external-->internal)
+
     :param: dictionary: (dict) User data (time and voltage)
     :return: dat: (tuple) User data (time and voltage)
     """
@@ -67,6 +69,7 @@ def check_and_parse_summary(dictionary):
 def calc_summary(dat):
     """
     This calculates the average heart rate and brady tachy annotations
+
     :param: dat: (tuple) User data (time and voltage)
     :return: output: (dict) Contains time, instantaneous HR, and brady tachy cardia annotations
     """
@@ -91,6 +94,7 @@ def calc_summary(dat):
 def get_data_for_average():
     """
     Average endpoint: Accepts user data and returns average heart rate and brady tachy annotations
+
     :return: resp: (json) average heart rate and brady tachy annotations
     """
     global count_requests
@@ -105,6 +109,7 @@ def get_data_for_average():
 def check_and_parse_average(dictionary):
     """
     This validates the user input data and turns it into a tuple (Map external-->internal)
+
     :return: dictionary: (dict) User data (time and voltage)
     """
     # Check that time, voltage, and averaging period data were provided
@@ -153,6 +158,7 @@ def check_and_parse_average(dictionary):
 
 def calc_average_summary(dat, avg_secs):
     """
+
     :param dat: (tuple) User data (time and voltage)
     :param avg_secs: (int) Number of seconds to average over (bin size)
     :return: output: (json) Contains the time interval, averaging period,
@@ -175,6 +181,7 @@ def calc_average_summary(dat, avg_secs):
 def requests():
     """
     Returns the number of requests made to the server since its last reboot
+
     :return: resp: (int) The number of requests
     """
     global count_requests
