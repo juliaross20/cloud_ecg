@@ -12,4 +12,4 @@ install:
   - conda env create -f environment.yml # Create your environment
   - source activate cloudECG  # Activate your environment 
 script:
-- py.test # Run the test
+  - py.test test_files # Run the test, but only on ecg_class files
