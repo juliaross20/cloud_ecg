@@ -27,7 +27,7 @@ def check_and_parse_summary(dictionary):
     :param: dictionary: (dict) User data (time and voltage)
     :return: dat: (tuple) User data (time and voltage)
     """
-
+    # Check that time and voltage data were provided
     if 'time' in dictionary.keys():
         d1 = dictionary['time']
     else:
@@ -55,6 +55,12 @@ def check_and_parse_summary(dictionary):
                 except ValueError:
                     return send_error('Dictionary does not contain valid ''voltage'' data', 400)
     dat = (np.array(d1), np.array(d2))
+    # Check that time and voltage data have same number of elements
+    if len(dat[0]) != len(dat[1]):
+        return send_error('Time and voltage arrays must have same number of elements', 400)
+    # Check that data isn't entirely negative
+    if np.all(np.where(dat[1] < 0, 1, 0)):
+        return send_error('Data is entirely negative', 400)
     return dat
 
 
@@ -91,7 +97,7 @@ def get_data_for_average():
     count_requests += 1
     req = request.json  # Retrieve external data
     dat, ap = check_and_parse_average(req)  # Validate the data and map to internal format
-    out = give_average_summary(dat, ap)  # Process the data
+    out = calc_average_summary(dat, ap)  # Process the data
     resp = jsonify(out)  # Map internal data to external format
     return resp  # Respond to client
 
@@ -101,6 +107,7 @@ def check_and_parse_average(dictionary):
     This validates the user input data and turns it into a tuple (Map external-->internal)
     :return: dictionary: (dict) User data (time and voltage)
     """
+    # Check that time, voltage, and averaging period data were provided
     if 'time' in dictionary.keys():
         d1 = dictionary['time']
     else:
@@ -132,10 +139,19 @@ def check_and_parse_average(dictionary):
     else:
         return send_error('Dictionary does not contain valid ''averaging_period'' data', 400)
     dat = (np.array(d1), np.array(d2))
-    return dat, ap
+    # Check that time and voltage data have same number of elements
+    if len(dat[0]) != len(dat[1]):
+        return send_error('Time and voltage arrays must have same number of elements', 400)
+    # Check that there is enough data for averaging during the specified averaging period
+    if dat[0][-1] < ap:
+        return send_error('Not enough data for averaging', 400)
+    # Check that data isn't entirely negative
+    if np.all(np.where(dat[1] < 0, 1, 0)):
+        return send_error('Data is entirely negative', 400)
+    return dat
 
 
-def give_average_summary(dat, avg_secs):
+def calc_average_summary(dat, avg_secs):
     """
     :param dat: (tuple) User data (time and voltage)
     :param avg_secs: (int) Number of seconds to average over (bin size)
