@@ -56,8 +56,10 @@ def check_and_parse_summary(dictionary):
                     d2 = dictionary['Voltage']
                 except ValueError:
                     return send_error('Dictionary does not contain valid ''voltage'' data', 400)
-    dat = (np.array(d1), np.array(d2))
+    dat = (np.array([d1]), np.array([d2]))
     # Check that time and voltage data have same number of elements
+    if len(dat[0]<27):
+        return send_error('The data needs to have at least 27 points to be properly filtered',400)
     if len(dat[0]) != len(dat[1]):
         return send_error('Time and voltage arrays must have same number of elements', 400)
     # Check that data isn't entirely negative
@@ -74,10 +76,10 @@ def calc_summary(dat):
     :return: output: (dict) Contains time, instantaneous HR, and brady tachy cardia annotations
     """
 
-    #   try:
+    #try:
     ecg_object = ECG_Class(dat)
-    #   except: # this should be made much more specific
-    #       return send_error('stop giving me bad data dummy', 400)
+    #except: # this should be made much more specific
+    #    return send_error('stop giving me bad data dummy', 400)
 
     hr = ecg_object.instHR
     ta = ecg_object.tachy('inst')
